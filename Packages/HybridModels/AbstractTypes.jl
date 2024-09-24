@@ -1,0 +1,3 @@
+abstract type AbstractAgent end
+abstract type AbstractKnowledgeDrivenComponent end
+abstract type AbstractDataDrivenComponent end
