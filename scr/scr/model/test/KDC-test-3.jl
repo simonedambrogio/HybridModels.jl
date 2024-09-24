@@ -2,8 +2,7 @@ path2root = dirname(Base.active_project());
 include( joinpath(path2root, "scr", "scr", "utils.jl") );
 using Functors, StatsFuns, MacroTools, JLD2, HybridModels;
 include("../𝐷.jl"); include("../model.jl"); 
-X, y = joinpath(path2root, "scr", "outcome", "test_data.jld2") |> load_object |> first;
-
+X, y = d = joinpath(path2root, "scr", "outcome", "test_data.jld2") |> load_object |> first;
 
 
 macro hybridmodel(expr)
@@ -45,6 +44,8 @@ macro hybridmodel(expr)
     # Create expressions to access parameters from KDC and DDC instances
     kdc_param_access = [:($(name) = m.kdc.params[m.kdc.names .== $(QuoteNode(name))][1]) for name in kdc_param_names]
     ddc_param_access = [:($(name) = m.ddc.params[m.ddc.names .== $(QuoteNode(name))][1]) for name in ddc_param_names]
+    
+    num_kdc_params = length(kdc_param_names)
 
     hybrid_model = quote
         function (m::HybridModel)(X)
@@ -52,6 +53,21 @@ macro hybridmodel(expr)
             $(ddc_param_access...)
             $(body...)
         end
+
+        function (m::HybridModel)(params::Vector, X)
+            # Assuming params is a flat vector of all parameters
+            kdc_params = @view params[1:m.kdc.n_params]
+            m.kdc.params .= kdc_params
+        
+            if length(params) > m.kdc.n_params
+                ddc_params = @view params[m.kdc.n_params+1:end]
+                m.ddc.params .= ddc_params
+            end
+            
+            # Call the original method with updated parameters
+            m(X)
+        end
+
     end
 
     result = quote
@@ -105,7 +121,24 @@ end
     return [(voiL .- coiL) (voiR .- coiR) (ρL .- ρR) (ρR .- ρL)]' ./ τ
 end;
 
-mymodel(X)
+
+m(X)
+
+θ = [
+    randn(Float32) |> abs, # λ₀
+    randn(Float32) |> abs, # ω
+    -(rand(Float32) + 1), # κ₁
+    -(rand(Float32) + 4), # λ₂
+    -(rand(Float32) - 1),  # τ
+    randn(Float32) |> abs, # β
+];
+
+
+(m)(X, θ)
+(m)(X)
+
+
+
 
 
 using Random, RobustNeuralNetworks
@@ -148,3 +181,4 @@ end;
 mymodel(X)
 
 mymodel.kdc
+

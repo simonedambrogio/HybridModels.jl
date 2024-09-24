@@ -2,6 +2,7 @@ using Functors
 struct DDCParams <: AbstractDataDrivenComponent
     params
     names
+    n_params::Int
 end
 
 function Base.show(io::IO, p::DDCParams)
@@ -19,7 +20,11 @@ function DDCParams(; kwargs...)
         push!(params, value)
         push!(names, key)
     end
-    DDCParams(params, names)
+    DDCParams(params, names, length(params))
+end
+
+function DDCParams(params::Vector, names::Vector{Symbol})
+    DDCParams(params, names, length(params))
 end
 
 @functor DDCParams

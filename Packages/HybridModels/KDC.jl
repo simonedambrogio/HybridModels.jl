@@ -3,6 +3,7 @@ using Functors
 struct KDCParams{T} <: AbstractKnowledgeDrivenComponent
     params::Vector{T}
     names::Vector{Symbol}
+    n_params::Int
 end
 
 function Base.show(io::IO, p::KDCParams)
@@ -20,7 +21,12 @@ function KDCParams{T}(; kwargs...) where T
         push!(params, value)
         push!(names, key)
     end
-    KDCParams{T}(params, names)
+    KDCParams{T}(params, names, length(params))
 end
+
+function KDCParams{T}(params::Vector{T}, names::Vector{Symbol}) where T
+    KDCParams{T}(params, names, length(params))
+end
+
 
 @functor KDCParams

@@ -5,7 +5,7 @@ include("AbstractTypes.jl");
 include("KDC.jl");
 include("DDC.jl");
 
-struct Agent <: AbstractAgent
+struct HybridModel <: AbstractHybridModel
     kdc::AbstractKnowledgeDrivenComponent
     ddc::AbstractDataDrivenComponent
 end
@@ -16,5 +16,5 @@ end
 # Add this constructor
 # Agent(kdc::AbstractKnowledgeDrivenComponent, ddc::AbstractDataDrivenComponent) = Agent{Float32}(kdc, ddc)
 
-@functor Agent
+@functor HybridModel
 

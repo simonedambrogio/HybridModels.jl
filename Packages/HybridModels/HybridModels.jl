@@ -2,8 +2,8 @@ __precompile__(false)
 
 module HybridModels
     
-    include("Agent.jl")
+    include("HybridModel.jl")
 
-    export Agent, KDCParams, DDCParams
+    export HybridModel, KDCParams, DDCParams
 end
 

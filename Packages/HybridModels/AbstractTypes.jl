@@ -1,3 +1,3 @@
-abstract type AbstractAgent end
+abstract type AbstractHybridModel end
 abstract type AbstractKnowledgeDrivenComponent end
 abstract type AbstractDataDrivenComponent end
