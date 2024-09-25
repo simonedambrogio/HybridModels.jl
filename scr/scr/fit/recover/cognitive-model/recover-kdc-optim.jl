@@ -30,17 +30,13 @@ println("Set Model and Parameters")
 @hybridmodel function generative_model(X)
     # --- Transform and Extract Parameters --- #
     @kdc begin
-        λ₀ = logit(0.99f0) 
-        ω  = logit(0.60f0) 
-        κ₁ = logit(0.25f0) 
-        λ₂ = logit(0.01f0) 
-        τ  = logit(0.08f0) 
+        λ₀ = logit(0.99f0) => σ
+        ω  = logit(0.60f0) => σ
+        κ₁ = logit(0.25f0) => σ
+        λ₂ = logit(0.01f0) => σ
+        τ  = logit(0.08f0) => σ
     end
     @ddc β = 1.2f0
-
-
-    # --- Transform parameters --- #
-    λ₀, ω, κ₁, λ₂, τ = σ(λ₀), σ(ω), σ(κ₁), σ(λ₂), σ(τ);
 
     # --- Compute α and β to establish the shape of the beta posterior distribution --- #
     nL = n0L(X) .+ n1_0L(X, ω)      .+ n1_1L(X) .+ n2_0L(X, λ₂) .+ n2_1L(X)
@@ -77,40 +73,28 @@ df -> (;
 
 println("Randomly Initialize Parameters")
 θinit = [
-    -(rand(Float32) + 1),  # κ₁
-    randn(Float32) |> abs, # ω
-    -(rand(Float32) - 1),  # τ
-    -(rand(Float32) + 4),  # λ₂
     randn(Float32) |> abs, # λ₀
+    randn(Float32) |> abs, # ω
+    -(rand(Float32) + 1),  # κ₁
+    -(rand(Float32) + 4),  # λ₂
+    -(rand(Float32) - 1),  # τ
     randn(Float32) |> abs, # β
 ];
-
-nt = (;
-    λ₀ = logit(0.99f0) + randn(Float32),
-    ω  = logit(0.60f0) + randn(Float32),
-    κ₁ = logit(0.25f0) + randn(Float32),
-    λ₂ = logit(0.01f0) + randn(Float32),
-    τ  = logit(0.08f0) + randn(Float32)
-);
-
-
-show(m; kdclink=σ)
-
 
 println("Optimize Parameters")
 # Define loss function to take θ and return a scalar
 m = deepcopy(generative_model);
-function loss(θ)
-    predictions = (m)(θ, data.train.X)
+HybridModels.predict!(m, θinit, data.train.X)
+function loss!(θ)
+    predictions = HybridModels.predict!(m, θ, data.train.X)
     return logitcrossentropy(predictions, data.train.y)
 end;
-opt_prob = Optim.optimize(loss, θinit, LBFGS()); # Create an optimization problem
+opt_prob = Optim.optimize(loss!, θinit, LBFGS()); # Create an optimization problem
 θ_opt = Optim.minimizer(opt_prob); # Get the optimized parameters
 # Print the results
 println("Optimization results:")
-θ_opt_dict = Dict(m.kdc.names[i] => σ(θ_opt[i]) for i in 1:length(m.kdc.names));
 println("Minimized loss: ", Optim.minimum(opt_prob))
-println("Optimized parameters: "); display(θ_opt_dict);
+println("Optimized parameters: "); display(m);
 
 # Create Dict using vector of Symbols and vector of values
 

@@ -1,6 +1,8 @@
 using MacroTools;
+include("Component.jl");
+include("KDC.jl");
 
-macro kdc(expr)
+macro kdc(args...)
     param_values = Expr(:vect)
     param_names = Expr(:vect)
     link_functions = Expr(:vect)
@@ -11,39 +13,52 @@ macro kdc(expr)
             value = arg.args[2]
             push!(param_names.args, QuoteNode(key))
             
-            if isa(value, Expr) && value.head == :tuple && length(value.args) == 2 &&
-               isa(value.args[2], Expr) && value.args[2].head == :macrocall &&
-               value.args[2].args[1] == Symbol("@link")
-                push!(param_values.args, value.args[1])
-                push!(link_functions.args, value.args[2].args[3])
+            if isa(value, Expr) && value.head == :call && value.args[1] == :(=>)
+                push!(param_values.args, value.args[2])
+                push!(link_functions.args, value.args[3])
             else
                 push!(param_values.args, value)
                 push!(link_functions.args, :identity)
             end
         else
-            error("Invalid syntax in @kdc macro. Use 'parameter = value' or 'parameter = value, @link(function)' format.")
+            error("Invalid syntax in @kdc macro. Use 'parameter = value' or 'parameter = value => function' format.")
         end
     end
 
-    if expr.head == :block
-        for arg in expr.args
+    if length(args) == 1 && isa(args[1], Expr) && args[1].head == :block
+        for arg in args[1].args
             if !(arg isa LineNumberNode)
                 process_arg(arg)
             end
         end
     else
-        process_arg(expr)
+        foreach(process_arg, args)
     end
 
     return quote
-        KDCParams{Float32}($(param_values), $(param_names), $(link_functions))
+        KDC(ComponentParams($(esc(param_values)), $(esc(param_names)), $(esc(link_functions))))
     end
 end
 
 # Example usage:
+# using StatsFuns, Flux;
 # k = @kdc begin
-#     α = logit(0.5f0), @link(σ)
-#     ω = 1.2 
+#     α = logit(0.5f0) => σ
+#     ω = 1.2f0
 #     β = exp(0.3f0)
-# end 
+# end;
 
+# k.params.params
+# k.params.names
+# k.params.link
+
+# k2 = @kdc α = logit(0.5f0) => σ ω = 1.2f0 β = exp(0.3f0)
+
+# k2.params.params
+# k2.params.names
+# k2.params.link
+
+# k3 = @kdc α = logit(0.5f0) => σ ω = 1.2f0 β = exp(0.3f0)
+# k3.params.params
+# k3.params.names
+# k3.params.link

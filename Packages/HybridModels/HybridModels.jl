@@ -5,6 +5,6 @@ module HybridModels
     include("HybridModel.jl")
     include("@hybridmodel.jl")
     
-    export HybridModel, KDCParams, DDCParams, @hybridmodel, @kdc, @ddc
+    export HybridModel, KDC, DDC, @hybridmodel, @kdc, @ddc, predict!
 end
 
