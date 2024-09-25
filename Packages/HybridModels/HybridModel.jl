@@ -10,6 +10,12 @@ struct HybridModel <: AbstractHybridModel
     ddc::AbstractDataDrivenComponent
 end
 
+
+function Base.show(m::HybridModel; kdclink::Function=identity, ddclink::Function=identity)
+    kdclink == identity ?  show(m.kdc) : show(m.kdc, kdclink)
+    ddclink == identity ?  show(m.ddc) : show(m.ddc, ddclink)
+end
+
 # function Agent(kdc::AbstractKnowledgeDrivenComponent, ddc::AbstractDataDrivenComponent)
 #     return Agent{typeof(kdc), typeof(ddc)}(kdc, ddc)
 # end

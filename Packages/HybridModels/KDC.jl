@@ -3,38 +3,29 @@ using Functors
 struct KDCParams{T} <: AbstractKnowledgeDrivenComponent
     params::Vector{T}
     names::Vector{Symbol}
-    n_params::Int
+    link::Vector{Function}
 end
 
 function Base.show(io::IO, p::KDCParams)
-    print(io, "KDCParams{$(eltype(p.params))}(\n")
-    for (name, value) in zip(p.names, p.params)
-        println(io, "  ", name, " = ", value)
+    print(io, "Knowledge-Driven Component\n")
+    for (i, (name, value)) in enumerate(zip(p.names, p.params))
+        println(io, "  ", name, " = ", p.link[i](value))
     end
-    print(io, ")")
-end
-
-function KDCParams{T}(; kwargs...) where T
-    params = T[]
-    names = Symbol[]
-    for (key, value) in kwargs
-        push!(params, value)
-        push!(names, key)
-    end
-    KDCParams{T}(params, names, length(params))
 end
 
 function KDCParams{T}(params::Vector{T}, names::Vector{Symbol}) where T
-    KDCParams{T}(params, names, length(params))
+    KDCParams{T}(params, names, fill(identity, length(params)))
 end
 
-function KDCParams(nt::NamedTuple)
-    # extract symbols and values from named tuple
-    names = keys(nt) |> collect
-    params = values(nt) |> collect
-    KDCParams{eltype(params)}(params, names, length(params))
+function KDCParams{T}(params::Vector{T}, names::Vector{Symbol}, link::Vector{Function}) where T
+    KDCParams{T}(params, names, link)
 end
 
-
+# function KDCParams(nt::NamedTuple)
+#     # extract symbols and values from named tuple
+#     names = keys(nt) |> collect
+#     params = values(nt) |> collect
+#     KDCParams{eltype(params)}(params, names, length(params))
+# end
 
 @functor KDCParams

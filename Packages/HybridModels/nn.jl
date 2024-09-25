@@ -1,6 +1,6 @@
 # Construct a neural network using Flux
 using Random, RobustNeuralNetworks, ProgressBars, JSON;
-# input_dim = 2;
+input_dim = 2;
 rng = Xoshiro();
 ny = 1
 nh = fill(32,4)   # 4 hidden layers, each with 32 neurons

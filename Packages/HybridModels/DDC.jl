@@ -1,30 +1,30 @@
 using Functors
-struct DDCParams <: AbstractDataDrivenComponent
-    params
-    names
-    n_params::Int
+
+struct DDCParams{T, S<:AbstractVector{Symbol}, L<:AbstractVector{<:Function}} <: AbstractDataDrivenComponent
+    params::T
+    names::S
+    link::L
 end
 
 function Base.show(io::IO, p::DDCParams)
-    print(io, "DDCParams{$(eltype(p.params))}(\n")
-    for (name, value) in zip(p.names, p.params)
-        println(io, "  ", name, " = ", value)
+    print(io, "Data-Driven Component\n")
+    if p.params isa AbstractVector
+        for (name, value, link) in zip(p.names, p.params, p.link)
+            println(io, "  ", name, " = ", link(value))
+        end
+    else
+        println(io, "  ", p.names[1], " = ", p.link[1](p.params))
     end
-    print(io, ")")
 end
 
-function DDCParams(; kwargs...)
-    params = []
-    names = Symbol[]
-    for (key, value) in kwargs
-        push!(params, value)
-        push!(names, key)
-    end
-    DDCParams(params, names, length(params))
+# Constructor for vector parameters
+function DDCParams(params::AbstractVector, names::AbstractVector{Symbol}, link::AbstractVector{<:Function})
+    DDCParams{typeof(params), typeof(names), typeof(link)}(params, names, link)
 end
 
-function DDCParams(params::Vector, names::Vector{Symbol})
-    DDCParams(params, names, length(params))
+# Constructor for non-vector parameters
+function DDCParams(params::T, names::AbstractVector{Symbol}, link::AbstractVector{<:Function}) where T
+    DDCParams{T, typeof(names), typeof(link)}(params, names, link)
 end
 
 @functor DDCParams

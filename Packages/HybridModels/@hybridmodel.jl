@@ -46,6 +46,19 @@ macro hybridmodel(expr)
     extract_params(kdc_params, kdc_param_names, kdc_param_values)
     extract_params(ddc_params, ddc_param_names, ddc_param_values)
 
+    # Infer link functions for KDC parameters
+    kdc_link_functions = Dict{Symbol, Symbol}()
+    for body_expr in body
+        if @capture(body_expr, (vars__,) = (funcs__,))
+            for (var, func) in zip(vars, funcs)
+                if var in kdc_param_names && func isa Expr && func.args[1] isa Symbol
+                    kdc_link_functions[var] = func.args[1]
+                end
+            end
+        end
+    end
+    println(kdc_link_functions)
+    
     # Create expressions to access parameters from KDC and DDC instances
     kdc_param_access = [:($(name) = m.kdc.params[m.kdc.names .== $(QuoteNode(name))][1]) for name in kdc_param_names]
     ddc_param_access = [:($(name) = m.ddc.params[m.ddc.names .== $(QuoteNode(name))][1]) for name in ddc_param_names]
@@ -78,6 +91,9 @@ macro hybridmodel(expr)
         kdc_params = KDCParams{Float32}($(Expr(:vect, kdc_param_values...)), $(Expr(:vect, QuoteNode.(kdc_param_names)...)))
         ddc_params = DDCParams($(Expr(:vect, ddc_param_values...)), $(Expr(:vect, QuoteNode.(ddc_param_names)...)))
         $(func_name) = HybridModel(kdc_params, ddc_params)
+
+        # Add inferred link functions to the result
+        kdc_link_functions = $(QuoteNode(kdc_link_functions))
 
         $(func_name)
     end

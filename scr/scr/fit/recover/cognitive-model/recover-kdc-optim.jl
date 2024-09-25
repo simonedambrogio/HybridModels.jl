@@ -3,30 +3,28 @@ joinpath(path2root, "scr", "scr", "utils.jl") |> include;
 joinpath(path2root, "scr", "scr", "model", "𝐷.jl") |> include;
 joinpath(path2root, "scr", "scr", "model", "model.jl") |> include;
 joinpath(path2root, "scr", "scr", "fit", "recover", "utils.jl") |> include;
-using Functors, StatsFuns, JLD2, HybridModels, Optim, NNlib;
+using Functors, StatsFuns, JLD2, HybridModels, Optim, NNlib, MLDataUtils;
 using CSV, DataFrames;
 using Flux: logitcrossentropy, softmax;
-
 
 println("\nLoading Data...")
 path2data = joinpath(path2root, "data", "preprocessed", "binary");
 ct1 = CSV.read( joinpath( path2data, "ct1.csv"), DataFrame );
-trials = vcat([
+d = vcat([
     begin
         sbjdf = filter(r -> r.subject==subject, ct1);
-        trials = vcat(
+        vcat(
             [ # Trials
                 sbjdf |> 
                 filter(r -> r.trial==trial && r.event in ["switch", "stay", "select"] && r.visit>0) |> 
-                df -> Trial(df) for trial in sbjdf.trial |> unique
-            ]
+                df -> Trial(df) |> 
+                create_dataframe
+                for trial in sbjdf.trial |> unique
+            ]...
         );
-        trials
     end
     for subject in 1:15
 ]...);
-d = vcat([create_dataframe(trial) for trial in trials]...);
-
 
 println("Set Model and Parameters")
 @hybridmodel function generative_model(X)
@@ -40,7 +38,7 @@ println("Set Model and Parameters")
     end
     @ddc β = 1.2f0
 
-    
+
     # --- Transform parameters --- #
     λ₀, ω, κ₁, λ₂, τ = σ(λ₀), σ(ω), σ(κ₁), σ(λ₂), σ(τ);
 
@@ -70,10 +68,10 @@ end;
 println("Simulate data")
 pact = generative_model(d) |> softmax;
 d.act = [rand( Distributions.Categorical(p[:]) ) for p in eachcol(pact)];
-(train_data, test_data) = splitobs(d, at=0.7);
-data = (;
-    train = (; X=train_data, y=onehotbatch(train_data.act, 1:4)),
-    test  = (; X=test_data, y=onehotbatch(test_data.act, 1:4))
+data = splitobs(d, at=0.7) |> 
+df -> (; 
+    train = (; X=df[1], y=onehotbatch(df[1].act, 1:4)), 
+    test  = (; X=df[2], y=onehotbatch(df[2].act, 1:4))
 );
 
 
@@ -84,12 +82,24 @@ println("Randomly Initialize Parameters")
     -(rand(Float32) - 1),  # τ
     -(rand(Float32) + 4),  # λ₂
     randn(Float32) |> abs, # λ₀
-    # randn(Float32) |> abs, # β
+    randn(Float32) |> abs, # β
 ];
+
+nt = (;
+    λ₀ = logit(0.99f0) + randn(Float32),
+    ω  = logit(0.60f0) + randn(Float32),
+    κ₁ = logit(0.25f0) + randn(Float32),
+    λ₂ = logit(0.01f0) + randn(Float32),
+    τ  = logit(0.08f0) + randn(Float32)
+);
+
+
+show(m; kdclink=σ)
 
 
 println("Optimize Parameters")
 # Define loss function to take θ and return a scalar
+m = deepcopy(generative_model);
 function loss(θ)
     predictions = (m)(θ, data.train.X)
     return logitcrossentropy(predictions, data.train.y)
