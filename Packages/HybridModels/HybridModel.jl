@@ -17,4 +17,3 @@ end
 # Agent(kdc::AbstractKnowledgeDrivenComponent, ddc::AbstractDataDrivenComponent) = Agent{Float32}(kdc, ddc)
 
 @functor HybridModel
-

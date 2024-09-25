@@ -1,3 +1,4 @@
+using Random;
 function create_dataframe(trial::Trial)
     
     extract_red(s::State) = Float32.(s.red);

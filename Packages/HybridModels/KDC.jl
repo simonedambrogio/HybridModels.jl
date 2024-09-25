@@ -28,5 +28,13 @@ function KDCParams{T}(params::Vector{T}, names::Vector{Symbol}) where T
     KDCParams{T}(params, names, length(params))
 end
 
+function KDCParams(nt::NamedTuple)
+    # extract symbols and values from named tuple
+    names = keys(nt) |> collect
+    params = values(nt) |> collect
+    KDCParams{eltype(params)}(params, names, length(params))
+end
+
+
 
 @functor KDCParams

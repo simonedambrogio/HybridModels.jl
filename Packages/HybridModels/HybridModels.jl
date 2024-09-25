@@ -3,7 +3,8 @@ __precompile__(false)
 module HybridModels
     
     include("HybridModel.jl")
-
-    export HybridModel, KDCParams, DDCParams
+    include("@hybridmodel.jl")
+    
+    export HybridModel, KDCParams, DDCParams, @hybridmodel, @kdc, @ddc
 end
 

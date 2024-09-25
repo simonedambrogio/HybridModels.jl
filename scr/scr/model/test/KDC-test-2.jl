@@ -1,77 +1,12 @@
 path2root = dirname(Base.active_project());
 include( joinpath(path2root, "scr", "scr", "utils.jl") );
-using Functors, StatsFuns, MacroTools, JLD2, HybridModels;
+using Functors, StatsFuns, JLD2, HybridModels;
 include("../𝐷.jl"); include("../model.jl"); 
 X, y = joinpath(path2root, "scr", "outcome", "test_data.jld2") |> load_object |> first;
 
 
 
-macro hybridmodel(expr)
-    @capture(expr, function func_name_(X_)
-        kdc_block_
-        ddc_block_
-        body__
-    end) || error("Invalid @hybridmodel syntax")
 
-    @capture(kdc_block, @kdc(kdc_params__)) || error("Invalid @kdc syntax")
-    @capture(ddc_block, @ddc(ddc_params__)) || error("Invalid @ddc syntax")
-
-    # Process KDC parameters
-    kdc_params_dict = Dict{Symbol, Any}()
-    for param in kdc_params
-        if @capture(param, key_ = value_)
-            kdc_params_dict[key] = value
-        else
-            error("Invalid syntax in @kdc block. Use 'parameter = value' format.")
-        end
-    end
-
-    kdc_param_names = collect(keys(kdc_params_dict))
-    kdc_param_values = [kdc_params_dict[name] for name in kdc_param_names]
-
-    # Process DDC parameters
-    ddc_params_dict = Dict{Symbol, Any}()
-    for param in ddc_params
-        if @capture(param, key_ = value_)
-            ddc_params_dict[key] = value
-        else
-            error("Invalid syntax in @ddc block. Use 'parameter = value' format.")
-        end
-    end
-
-    ddc_param_names = collect(keys(ddc_params_dict))
-    ddc_param_values = [ddc_params_dict[name] for name in ddc_param_names]
-
-    # Create expressions to access parameters from KDC and DDC instances
-    kdc_param_access = [:($(name) = m.kdc.params[m.kdc.names .== $(QuoteNode(name))][1]) for name in kdc_param_names]
-    ddc_param_access = [:($(name) = m.ddc.params[m.ddc.names .== $(QuoteNode(name))][1]) for name in ddc_param_names]
-
-    hybrid_model = quote
-        function (m::HybridModel)(X)
-            $(kdc_param_access...)
-            $(ddc_param_access...)
-            $(body...)
-        end
-    end
-
-    result = quote
-        $hybrid_model
-
-        kdc_params = KDCParams{Float32}(
-            Float32[$(kdc_param_values...)],
-            $kdc_param_names  # Changed this line
-        )
-        ddc_params = DDCParams(
-            [$(ddc_param_values...)],
-            $ddc_param_names  # Changed this line
-        )
-        $(func_name) = HybridModel(kdc_params, ddc_params)
-
-        $(func_name)
-    end
-
-    return esc(result)
-end
 
 
 @hybridmodel function m(X)
@@ -105,7 +40,7 @@ end
     return [(voiL .- coiL) (voiR .- coiR) (ρL .- ρR) (ρR .- ρL)]' ./ τ
 end;
 
-mymodel(X)
+m(X)
 
 
 using Random, RobustNeuralNetworks

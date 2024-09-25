@@ -17,71 +17,71 @@ using DataFrames
 f⁻(x::T, k::T, t::T) where T = x * exp(-k*t);
 
 # --- Left --- #
-function n0L(X::𝐷)
+function n0L(X)
     (2f0 .+ X.nL) .* X.initial_visit;
 end;
-function n1_0L(X::𝐷, ω)
+function n1_0L(X, ω)
     (2f0 .+ (ω .* X.nL) .+ ((1f0.-ω) .* X.nB)) .* X.gR .* X.first_visit;
 end;
-function n1_1L(X::𝐷)
+function n1_1L(X)
     (2f0 .+ X.nL) .* X.gL .* X.first_visit;
 end;
-function n2_0L(X::𝐷, λ₂)
+function n2_0L(X, λ₂)
     (2f0 .+ f⁻.(X.nL, λ₂, X.t)) .* X.gR .* X.after_first_visit;
 end;
-function n2_1L(X::𝐷)
+function n2_1L(X)
     (2f0 .+ X.nL) .* X.gL .* X.after_first_visit;
 end;
 
 # r
-function r0L(X::𝐷)
+function r0L(X)
     (2f0 .+ X.nL) .* 0.5f0  .* X.initial_visit;
 end;
-function r1_0L(X::𝐷, λ₀, nL::Vector{T}) where T
+function r1_0L(X, λ₀, nL::Vector{T}) where T
     (nL .* (0.5f0 .+ (X.μR .- 0.5f0) .* λ₀)) .* X.gR .* X.first_visit
 end;
-function r1_1L(X::𝐷)
+function r1_1L(X)
     (1f0 .+ X.rL) .* X.gL .* X.first_visit
 end;
-function r2_0L(X::𝐷, λ₂)
+function r2_0L(X, λ₂)
     (1f0 .+ f⁻.(X.rL,λ₂,X.t)) .* X.gR .* X.after_first_visit
 end;
-function r2_1L(X::𝐷)
+function r2_1L(X)
     (1f0 .+ X.rL) .* X.gL .* X.after_first_visit
 end;
 
 # --- Right --- #
 # N
-function n0R(X::𝐷)
+function n0R(X)
     (2f0 .+ X.nR) .* X.initial_visit;
 end;
-function n1_0R(X::𝐷, ω)
+function n1_0R(X, ω)
     (2f0 .+ (ω .* X.nR) .+ (1f0.-ω) .* X.nB) .* X.gL .* X.first_visit
 end;
-function n1_1R(X::𝐷)
+function n1_1R(X)
     (2f0 .+ X.nR) .* X.gR .* X.first_visit;
 end;
-function n2_0R(X::𝐷, λ₂)
+function n2_0R(X, λ₂)
     (2f0 .+ f⁻.(X.nR, λ₂, X.t)) .* X.gL .* X.after_first_visit;
 end;
-function n2_1R(X::𝐷)
+function n2_1R(X)
     (2f0 .+ X.nR) .* X.gR .* X.after_first_visit;
 end;
 
 # r
-function r0R(X::𝐷)
+function r0R(X)
     (2f0 .+ X.nR) .* 0.5f0  .* X.initial_visit;
 end;
-function r1_0R(X::𝐷, λ₀, nR::Vector{T}) where T
+function r1_0R(X, λ₀, nR::Vector{T}) where T
     (nR .* (0.5f0 .+ (X.μL .- 0.5f0) .* λ₀)) .* X.gL .* X.first_visit
 end;
-function r1_1R(X::𝐷)
+function r1_1R(X)
     (1f0 .+ X.rR) .* X.gR .* X.first_visit
 end;
-function r2_0R(X::𝐷, λ₂)
+function r2_0R(X, λ₂)
     (1f0 .+ f⁻.(X.rR,λ₂,X.t)) .* X.gL .* X.after_first_visit
 end;
-function r2_1R(X::𝐷)
+function r2_1R(X)
     (1f0 .+ X.rR) .* X.gR .* X.after_first_visit
 end;
 

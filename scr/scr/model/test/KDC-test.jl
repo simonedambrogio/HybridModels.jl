@@ -32,12 +32,44 @@ macro kdc(args...)
     end
 end
 
+macro kdc(expr)
+    param_values = Expr(:vect)
+    param_names = Expr(:vect)
+
+    function process_arg(arg)
+        if @capture(arg, key_ = value_)
+            push!(param_values.args, value)
+            push!(param_names.args, QuoteNode(key))
+        else
+            error("Invalid syntax in @kdc macro. Use 'parameter = value' format.")
+        end
+    end
+
+    if expr.head == :block
+        for arg in expr.args
+            if !(arg isa LineNumberNode)
+                process_arg(arg)
+            end
+        end
+    else
+        for arg in expr.args
+            process_arg(arg)
+        end
+    end
+
+    return quote
+        KDCParams{Float32}($(param_values), $(param_names))
+    end
+end
+
 # Test the macro
-kdc_params = @kdc begin
+@kdc λ₀ = 0.99f0 ω = 0.60f0 κ₁ = 0.25f0
+
+@kdc begin
     λ₀ = 0.99f0 
     ω = 0.60f0 
     κ₁ = 0.25f0
-end;
+end
 
 println(kdc_params)
 
