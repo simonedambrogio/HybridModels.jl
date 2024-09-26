@@ -10,6 +10,9 @@ struct HybridModel <: AbstractHybridModel
     ddc::AbstractDataDrivenComponent
 end
 
+(hm::HybridModel)(ddc::AbstractDataDrivenComponent) = HybridModel(hm.kdc, ddc);
+(hm::HybridModel)(kdc::AbstractKnowledgeDrivenComponent) = HybridModel(kdc, hm.ddc);
+
 function Base.show(io::IO, ac::HybridModel)
     println(io, "\n --------- Hybrid Model --------- ")
     show(io, ac.kdc)

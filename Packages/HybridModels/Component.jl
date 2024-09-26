@@ -7,17 +7,6 @@ struct ComponentParams{T, S<:AbstractVector{Symbol}, L<:AbstractVector{<:Functio
     link::L
 end
 
-# function Base.show(io::IO, ac::AbstractComponent)
-#     p = ac.params
-#     print(io, "\nData-Driven Component\n")
-#     if p.params isa AbstractVector
-#         for (name, value, link) in zip(p.names, p.params, p.link)
-#             println(io, "  ", name, " = ", link(value))
-#         end
-#     else
-#         println(io, "  ", p.names[1], " = ", p.link[1](p.params))
-#     end
-# end
 
 function Base.show(io::IO, ac::AbstractComponent)
     p = ac.params
@@ -50,3 +39,5 @@ function ComponentParams(params::AbstractVector, names::AbstractVector{Symbol}, 
     @assert length(params) == length(names) == length(link) "Lengths of params, names, and link must be equal"
     ComponentParams{typeof(params), typeof(names), typeof(link)}(params, names, link)
 end
+
+@functor ComponentParams
