@@ -30,7 +30,7 @@ d = vcat([
 println("Set Model and Parameters")
 @hybridmodel function generative_model(X)
 
-    # --- Transform and Extract Parameters --- #
+    # --- Parameters --- #
     @kdc begin
         λ₀ = logit(0.99f0) => σ
         ω  = logit(0.60f0) => σ
@@ -40,24 +40,25 @@ println("Set Model and Parameters")
     end
     @ddc β = 1.2f0
 
-    # --- Compute α and β to establish the shape of the beta posterior distribution --- #
+    # --- Subjective Magnitude --- #
     nL = n0L(X) .+ n1_0L(X, ω)      .+ n1_1L(X) .+ n2_0L(X, λ₂) .+ n2_1L(X)
     rL = r0L(X) .+ r1_0L(X, λ₀, nL) .+ r1_1L(X) .+ r2_0L(X, λ₂) .+ r2_1L(X)
     nR = n0R(X) .+ n1_0R(X, ω)      .+ n1_1R(X) .+ n2_0R(X, λ₂) .+ n2_1R(X)
     rR = r0R(X) .+ r1_0R(X, λ₀, nR) .+ r1_1R(X) .+ r2_0R(X, λ₂) .+ r2_1R(X)
 
-    # --- Value of Select --- #    
+    # --- Value of Select --- #
     ρL = rL ./ nL
     ρR = rR ./ nR
 
-    # --- Value of Information --- #    
+    # --- Value of Sampling --- #
+    # Value of Information
     voiL = ucb([nL nR]', β)'
     voiR = ucb([nR nL]', β)'
-
-    # --- Cost of Information --- #    
+    # Cost of Information
     coiL = (1f0 .- X.gL) .* κ₁
     coiR = (1f0 .- X.gR) .* κ₁
 
+    # --- logit(p) action --- #
     return [(voiL .- coiL) (voiR .- coiR) (ρL .- ρR) (ρR .- ρL)]' ./ τ
 end;
 
@@ -74,11 +75,10 @@ df -> (;
 println("Randomly Initialize Parameters")
 rng = Xoshiro();
 input_dim, ny, nh, γ = 2, 1, fill(32,4), 5;
-nnpars = DenseLBDNParams{Float32}(input_dim, nh, ny, γ; nl=Flux.tanh, learn_γ=true, rng);
 
 @hybridmodel function hybrid_model(X)
 
-    # --- Transform and Extract Parameters --- #
+    # --- Parameters --- #
     @kdc begin
         λ₀ = logit(0.99f0) => σ
         ω  = logit(0.60f0) => σ
@@ -88,7 +88,7 @@ nnpars = DenseLBDNParams{Float32}(input_dim, nh, ny, γ; nl=Flux.tanh, learn_γ=
     end
     @ddc θ = DenseLBDNParams{Float32}(input_dim, nh, ny, γ; nl=Flux.tanh, learn_γ=true, rng);
 
-    # --- Compute α and β to establish the shape of the beta posterior distribution --- #
+    # --- Subjective Magnitude --- #
     nL = n0L(X) .+ n1_0L(X, ω)      .+ n1_1L(X) .+ n2_0L(X, λ₂) .+ n2_1L(X)
     rL = r0L(X) .+ r1_0L(X, λ₀, nL) .+ r1_1L(X) .+ r2_0L(X, λ₂) .+ r2_1L(X)
     nR = n0R(X) .+ n1_0R(X, ω)      .+ n1_1R(X) .+ n2_0R(X, λ₂) .+ n2_1R(X)
@@ -98,15 +98,16 @@ nnpars = DenseLBDNParams{Float32}(input_dim, nh, ny, γ; nl=Flux.tanh, learn_γ=
     ρL = rL ./ nL
     ρR = rR ./ nR
 
-    # --- Value of Information --- #    
+    # --- Value of Sampling --- #
+    # Value of Information
     nn = LBDN(θ);
     voiL = nn([nL nR]')'
     voiR = nn([nR nL]')'
-
-    # --- Cost of Information --- #    
+    # Cost of Information
     coiL = (1f0 .- X.gL) .* κ₁
     coiR = (1f0 .- X.gR) .* κ₁
 
+    # --- logit(p) action --- #
     return [(voiL .- coiL) (voiR .- coiR) (ρL .- ρR) (ρR .- ρL)]' ./ τ
 end;
 
@@ -138,17 +139,20 @@ for epoch in 1:100
   end
 end
 
-function train!(model::HybridModel, data, pars, opt) 
+function train!(model::HybridModel, loss, ps::Flux.Params, data, opt::Flux.Optimise.AbstractOptimiser) 
 
     for (input, label) in data
         # Calculate Gradient and Update Neural Network
-        grads = gradient(() -> loss(model, input, label), pars);
-        Flux.update!(opt, pars, grads);
+        grads = gradient(() -> loss(model, input, label), ps);
+        Flux.update!(opt, ps, grads);
     end
 
 end
 
-train!(hybrid_model, dataminibatch.train, par, opt)
+train!(hybrid_model, loss, par, dataminibatch.train, opt)
+
+
+
 
 println("Start Training...")
 train_data, test_data = dataminibatch;
