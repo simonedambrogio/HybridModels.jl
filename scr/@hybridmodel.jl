@@ -1,7 +1,7 @@
 using MacroTools;
-include("HybridModel.jl");
-include("@kdc.jl"); 
-include("@ddc.jl");
+# include("HybridModel.jl");
+# include("@kdc.jl"); 
+# include("@ddc.jl");
 
 macro hybridmodel(expr)
     @capture(expr, function func_name_(X_)

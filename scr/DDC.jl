@@ -1,11 +1,11 @@
 using Functors
-include("Component.jl");
+# include("Component.jl");
 
 struct DDC <: AbstractDataDrivenComponent
     params::ComponentParams
 end
 
-function DDC(θ::T) where T
+function DDC(θ)
     DDC(
         ComponentParams(
             typeof(θ)[θ], 

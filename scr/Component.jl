@@ -1,12 +1,11 @@
 using Functors
-include("AbstractTypes.jl")
+# include("AbstractTypes.jl")
 
 struct ComponentParams{T, S<:AbstractVector{Symbol}, L<:AbstractVector{<:Function}} <: AbstractComponent
     params::T
     names::S
     link::L
 end
-
 
 function Base.show(io::IO, ac::AbstractComponent)
     p = ac.params

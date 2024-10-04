@@ -1,17 +1,12 @@
-using Flux, Statistics, Distributions, Functors, Optimisers, RobustNeuralNetworks,
-    StaticArrays, LoopVectorization, Random, ComponentArrays, DataFrames, DataStructures;
-using StatsFuns, StatsBase
-include("AbstractTypes.jl");
-# include("KDC.jl");
-# include("DDC.jl");
+using Functors
 
 struct HybridModel <: AbstractHybridModel
     kdc::AbstractKnowledgeDrivenComponent
     ddc::AbstractDataDrivenComponent
 end
 
-(hm::HybridModel)(ddc::AbstractDataDrivenComponent) = HybridModel(hm.kdc, ddc);
-(hm::HybridModel)(kdc::AbstractKnowledgeDrivenComponent) = HybridModel(kdc, hm.ddc);
+(hm::HybridModel)(ddc::AbstractDataDrivenComponent) = HybridModel(hm.kdc, ddc)
+(hm::HybridModel)(kdc::AbstractKnowledgeDrivenComponent) = HybridModel(kdc, hm.ddc)
 
 function Base.show(io::IO, ac::HybridModel)
     println(io, "\n --------- Hybrid Model --------- ")

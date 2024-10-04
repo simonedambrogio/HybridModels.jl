@@ -1,5 +1,5 @@
-using Functors
-include("Component.jl")
+# using Functors
+# include("Component.jl")
 
 struct KDC <: AbstractKnowledgeDrivenComponent
     params::ComponentParams

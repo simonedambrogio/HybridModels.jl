@@ -1,8 +1,7 @@
 using MacroTools;
-include("Component.jl");
-include("KDC.jl");
+# include("DDC.jl");
 
-macro kdc(args...)
+macro ddc(args...)
     param_values = Expr(:vect)
     param_names = Expr(:vect)
     link_functions = Expr(:vect)
@@ -36,29 +35,59 @@ macro kdc(args...)
     end
 
     return quote
-        KDC(ComponentParams($(esc(param_values)), $(esc(param_names)), $(esc(link_functions))))
+        DDC(
+            ComponentParams(
+                $(esc(param_values)), 
+                $(esc(param_names)), 
+                $(esc(link_functions))
+            )
+        )
     end
 end
 
+
 # Example usage:
 # using StatsFuns, Flux;
-# k = @kdc begin
+# d = @ddc begin
 #     α = logit(0.5f0) => σ
 #     ω = 1.2f0
 #     β = exp(0.3f0)
 # end;
 
-# k.params.params
-# k.params.names
-# k.params.link
+# d.params.params
+# d.params.names
+# d.params.link
 
-# k2 = @kdc α = logit(0.5f0) => σ ω = 1.2f0 β = exp(0.3f0)
+# d2 = @kdc α = logit(0.5f0) => σ ω = 1.2f0 β = exp(0.3f0)
 
-# k2.params.params
-# k2.params.names
-# k2.params.link
+# d2.params.params
+# d2.params.names
+# d2.params.link
 
-# k3 = @kdc α = logit(0.5f0) => σ ω = 1.2f0 β = exp(0.3f0)
-# k3.params.params
-# k3.params.names
-# k3.params.link
+# d3 = @kdc α = logit(0.5f0) => σ ω = 1.2f0 β = exp(0.3f0)
+# d3.params.params
+# d3.params.names
+# d3.params.link
+
+
+# using Random, RobustNeuralNetworks, ProgressBars, JSON;
+# input_dim = 2;
+# rng = Xoshiro();
+# ny = 1
+# nh = fill(32,4)   # 4 hidden layers, each with 32 neurons
+# γ = 5             # Start with a Lipschitz bound of 5
+# nnpars = DenseLBDNParams{Float32}(input_dim, nh, ny, γ; nl=Flux.tanh, learn_γ=true, rng);
+# d = @ddc begin
+#     θ = nnpars
+# end;
+
+# d.params.params
+# d.params.names
+# d.params.link
+
+# d = @ddc θ = nnpars;
+
+# d.params.params
+# d.params.names
+# d.params.link
+
