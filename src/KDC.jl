@@ -1,13 +1,13 @@
 # using Functors
 # include("Component.jl")
 
-struct KDC <: AbstractKnowledgeDrivenComponent
+struct KnowledgeDrivenComponent <: AbstractKnowledgeDrivenComponent
     params::ComponentParams
 end
 
-function Base.show(io::IO, kdc::AbstractKnowledgeDrivenComponent)
+function Base.show(io::IO, kdc::KnowledgeDrivenComponent)
     println(io, "\nKnowledge-Driven Component")
-    display(kdc.params)
+    show(io, kdc.params)
 end
 
-@functor KDC
+@functor KnowledgeDrivenComponent

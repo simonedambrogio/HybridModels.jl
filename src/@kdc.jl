@@ -1,5 +1,5 @@
 using MacroTools;
-# include("KDC.jl");
+# include("KnowledgeDrivenComponent.jl");
 
 macro kdc(args...)
     param_values = Expr(:vect)
@@ -35,7 +35,7 @@ macro kdc(args...)
     end
 
     return quote
-        KDC(ComponentParams($(esc(param_values)), $(esc(param_names)), $(esc(link_functions))))
+        KnowledgeDrivenComponent(ComponentParams($(esc(param_values)), $(esc(param_names)), $(esc(link_functions))))
     end
 end
 

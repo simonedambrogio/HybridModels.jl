@@ -1,5 +1,5 @@
 using MacroTools;
-# include("DDC.jl");
+# include("DataDrivenComponent.jl");
 
 macro ddc(args...)
     param_values = Expr(:vect)
@@ -35,7 +35,7 @@ macro ddc(args...)
     end
 
     return quote
-        DDC(
+        DataDrivenComponent(
             ComponentParams(
                 $(esc(param_values)), 
                 $(esc(param_names)), 

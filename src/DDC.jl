@@ -1,17 +1,17 @@
 using Functors
 # include("Component.jl");
 
-struct DDC <: AbstractDataDrivenComponent
+struct DataDrivenComponent <: AbstractDataDrivenComponent
     params::ComponentParams
 end
 
-function Base.show(io::IO, kdc::AbstractKnowledgeDrivenComponent)
+function Base.show(io::IO, ddc::DataDrivenComponent)
     println(io, "\nData-Driven Component")
-    display(kdc.params)
+    show(io, ddc.params)
 end
 
-function DDC(θ)
-    DDC(
+function DataDrivenComponent(θ)
+    DataDrivenComponent(
         ComponentParams(
             typeof(θ)[θ], 
             Symbol[:θ], 
@@ -20,4 +20,4 @@ function DDC(θ)
     )
 end
 
-@functor DDC
+@functor DataDrivenComponent
