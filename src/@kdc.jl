@@ -41,11 +41,11 @@ end
 
 # Example usage:
 # using StatsFuns, Flux;
-# k = @kdc begin
-#     α = logit(0.5f0) => σ
-#     ω = 1.2f0
-#     β = exp(0.3f0)
-# end;
+k = @kdc begin
+    α = 0.5f0 => sum
+    ω = 1.2f0
+    β = exp(0.3f0)
+end;
 
 # k.params.params
 # k.params.names
@@ -61,3 +61,15 @@ end
 # k3.params.params
 # k3.params.names
 # k3.params.link
+
+# @kdc begin 
+#     A = log(1) => exp # starting point of each accumulator is sampled uniformly between k=[0, A]
+#     b = log(5) => exp # boundary is sampled uniformly between [k, k+b]
+#     τ = log(0.3) => exp # Non-decision time is an additive constant representing encoding and motor response time.
+# end 
+
+# @kdc begin
+#     α = 0.5f0 => sum
+#     ω = 1.2f0
+#     β = exp(0.3f0)
+# end
