@@ -3,13 +3,12 @@ using Functors
 
 struct DataDrivenComponent <: AbstractDataDrivenComponent
     params::ComponentParams
+    
+    # Inner constructor
+    DataDrivenComponent(params::ComponentParams) = new(params)
 end
 
-function Base.show(io::IO, ddc::DataDrivenComponent)
-    println(io, "\nData-Driven Component")
-    show(io, ddc.params)
-end
-
+# Outer constructor
 function DataDrivenComponent(θ)
     DataDrivenComponent(
         ComponentParams(

@@ -47,12 +47,12 @@ end
 
 
 # Example usage:
-# using StatsFuns, Flux;
-# d = @ddc begin
-#     α = logit(0.5f0) |> σ
-#     ω = 1.2f0
-#     β = exp(0.3f0)
-# end;
+
+d = @ddc begin
+    α = 0.5f0 |> exp
+    ω = 1.2f0
+    β = exp(0.3f0)
+end;
 
 # d.params.params
 # d.params.names
