@@ -12,7 +12,7 @@ macro ddc(args...)
             value = arg.args[2]
             push!(param_names.args, QuoteNode(key))
             
-            if isa(value, Expr) && value.head == :call && value.args[1] == :(=>)
+            if isa(value, Expr) && value.head == :call && value.args[1] == :(|>)
                 push!(param_values.args, value.args[2])
                 push!(link_functions.args, value.args[3])
             else
@@ -20,7 +20,7 @@ macro ddc(args...)
                 push!(link_functions.args, :identity)
             end
         else
-            error("Invalid syntax in @kdc macro. Use 'parameter = value' or 'parameter = value => function' format.")
+            error("Invalid syntax in @kdc macro. Use 'parameter = value' or 'parameter = value |> function' format.")
         end
     end
 
@@ -49,7 +49,7 @@ end
 # Example usage:
 # using StatsFuns, Flux;
 # d = @ddc begin
-#     α = logit(0.5f0) => σ
+#     α = logit(0.5f0) |> σ
 #     ω = 1.2f0
 #     β = exp(0.3f0)
 # end;
@@ -58,13 +58,13 @@ end
 # d.params.names
 # d.params.link
 
-# d2 = @kdc α = logit(0.5f0) => σ ω = 1.2f0 β = exp(0.3f0)
+# d2 = @kdc α = logit(0.5f0) |> σ ω = 1.2f0 β = exp(0.3f0)
 
 # d2.params.params
 # d2.params.names
 # d2.params.link
 
-# d3 = @kdc α = logit(0.5f0) => σ ω = 1.2f0 β = exp(0.3f0)
+# d3 = @kdc α = logit(0.5f0) |> σ ω = 1.2f0 β = exp(0.3f0)
 # d3.params.params
 # d3.params.names
 # d3.params.link

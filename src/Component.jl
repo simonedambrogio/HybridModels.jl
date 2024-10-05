@@ -7,26 +7,21 @@ struct ComponentParams{T, S<:AbstractVector{Symbol}, L<:AbstractVector{<:Functio
     link::L
 end
 
-function Base.show(io::IO, ac::AbstractComponent)
-    p = ac.params
 
-    if ac isa KDC
-        println(io, "\nKnowledge-Driven Component")
-    else
-        println(io, "\nData-Driven Component")
-    end
-    
+function Base.show(io::IO, ac::ComponentParams)
+
+    println("")
     # Find the maximum length of parameter names
-    max_name_length = maximum(length(string(name)) for name in p.names)
+    max_name_length = maximum(length(string(name)) for name in ac.names)
     
-    if typeof(p.params) <: AbstractVector{<:AbstractFloat}
-        for (name, value, link) in zip(p.names, p.params, p.link)
+    if typeof(ac.params) <: AbstractVector{<:AbstractFloat}
+        for (name, value, link) in zip(ac.names, ac.params, ac.link)
             # Format the name with right-justified padding
             formatted_name = rpad(string(name), max_name_length)
             println(io, "  ", formatted_name, " = ", round(link(value), digits=3))
         end
     else
-        println(io, "  ", eltype(p.params))
+        println(io, "  ", eltype(ac.params))
     end
 end
 
