@@ -34,4 +34,14 @@ function predict!(m::HybridModel, params::Vector, X)
     m(X)
 end
 
+function params(m::HybridModel, component=nothing)
+    if component == :kdc
+        return m.kdc.params.params
+    elseif component == :ddc
+        return m.ddc.params.params
+    else
+        return vcat(m.kdc.params.params, m.ddc.params.params)
+    end
+end
+
 @functor HybridModel
