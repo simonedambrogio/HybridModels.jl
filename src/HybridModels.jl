@@ -6,13 +6,13 @@ module HybridModels
     import MacroTools
     include("AbstractTypes.jl")
     include("Component.jl")
-    include("KDC.jl")
-    include("DDC.jl")
+    include("KnowledgeDrivenComponent.jl")
+    include("DataDrivenComponent.jl")
     include("HybridModel.jl")
     include("@kdc.jl")
     include("@ddc.jl")
     include("@hybridmodel.jl")
     
-    export HybridModel, KDC, DDC, @hybridmodel, @kdc, @ddc, predict!
+    export HybridModel, KnowledgeDrivenComponent, DataDrivenComponent, @hybridmodel, @kdc, @ddc, predict!
 end
 
