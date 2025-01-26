@@ -1,6 +1,6 @@
 # HybridModels.jl
 
-> ⚠️ **Development Status**: This package is in early development and should be considered alpha software. It is not yet ready for production use. Expect frequent breaking changes, incomplete features, and potential bugs. We welcome feedback and contributions to help improve the package.
+> ⚠️ **Development Status**: This package is in early development. Expect frequent breaking changes, incomplete features, and potential bugs.
 
 A Julia package for implementing hybrid models that combine knowledge-driven and data-driven approaches in cognitive neuroscience and behavioral modeling.
 
